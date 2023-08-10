@@ -7,13 +7,28 @@ using System.Linq.Expressions;
 namespace MudBlazor;
 
 #nullable enable
+
+
+
+
 public static class FilterExpressionGenerator
 {
     public static Expression<Func<T, bool>> GenerateExpression<T>(IFilterDefinition<T> filter, FilterOptions? filterOptions)
     {
         filterOptions ??= FilterOptions.Default; //Default if null
         var propertyExpression = filter.Column?.PropertyExpression;
+        
+        // TODO create property expression from Type T and property name as string, with result being x => x.{PropertyName}
+        ParameterExpression argParam = Expression.Parameter(typeof(T), "x");
+        Expression nameProperty = Expression.Property(argParam, filter.Column?.PropertyName);
+        // var p = Expression.Property(propertyName: filter.Column?.PropertyName);
+        
+        
+         propertyExpression = Expression.Lambda<Func<T, string>>(nameProperty, parameters: new ParameterExpression[]{argParam});
+  
 
+        
+        
         if (propertyExpression is null)
         {
             return x => true;

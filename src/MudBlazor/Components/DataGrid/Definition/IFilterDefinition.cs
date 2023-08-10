@@ -7,11 +7,16 @@ using System;
 namespace MudBlazor
 {
 #nullable enable
-    public interface IFilterDefinition<T>
+    
+    /// <summary>
+    /// This is meant to be transmitted on the wire (probably json), so it can be used on the server
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface IFilterDefinitionForBuilder<T>
     {
         Guid Id { get; set; }
 
-        Column<T>? Column { get; set; }
+        string? PropertyName { get; }
 
         string? Title { get; set; }
 
@@ -19,7 +24,16 @@ namespace MudBlazor
 
         object? Value { get; set; }
 
-        FieldType FieldType => FieldType.Identify(Column?.PropertyType);
+        FieldType FieldType { get; }
+    }
+    
+    public interface IFilterDefinition<T> : IFilterDefinitionForBuilder<T>
+    {
+        Column<T>? Column { get; set; }
+
+        string? IFilterDefinitionForBuilder<T>.PropertyName => Column?.PropertyName;
+
+        FieldType IFilterDefinitionForBuilder<T>.FieldType => FieldType.Identify(Column?.PropertyType);
 
         Func<T, bool> GenerateFilterFunction(FilterOptions? filterOptions = null);
 
